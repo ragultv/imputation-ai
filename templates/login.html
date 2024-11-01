@@ -1,0 +1,95 @@
+<!-- login.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Imputation AI</title>
+    <style>
+        .login-container {
+            max-width: 400px;
+            margin: 50px auto;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            background-color: white;
+        }
+        body{
+            background-color: #d6d6d6;
+        }
+        .login-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        input {
+            width: 94.5%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        p{
+
+            font-size: medium ;
+
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <h1> Imp AI</h1>
+        </div>
+        <p>Enter your email</p>
+        <form>
+            <input type="text" name="identifier" placeholder="Email " required>
+            <button type="submit">Send OTP</button>
+        </form>
+    </div>
+    <script>
+        // login.js
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginForm = document.querySelector('form');
+
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const identifier = document.querySelector('input[name="identifier"]').value;
+
+                try {
+                    const response = await fetch('/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ identifier }),
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        // Redirect to OTP verification page
+                        window.location.href = '/login-otp?identifier=' + encodeURIComponent(identifier);
+                    } else {
+                        alert(data.error);
+                    }
+                } catch (error) {
+                    alert('An error occurred. Please try again.');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

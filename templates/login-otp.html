@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify OTP -Imputation AI </title>
+    <style>
+        .verify-container {
+            max-width: 400px;
+            margin: 50px auto;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            background-color: white;
+        }
+        body{
+            background-color: #d6d6d6;
+        }
+        .verify-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .otp-input-container {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
+        }
+        .otp-input {
+            width: 40px;
+            height: 40px;
+            text-align: center;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 20px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        p{
+
+            font-size: medium ;
+
+}
+    </style>
+</head>
+<body>
+    <div class="verify-container">
+        <div class="verify-header">
+            <h1>Imp AI</h1>
+        </div>
+        <p>Enter the 6-digit OTP</p>
+        <form>
+            <div class="otp-input-container">
+                <input type="text" class="otp-input" maxlength="1" required>
+                <input type="text" class="otp-input" maxlength="1" required>
+                <input type="text" class="otp-input" maxlength="1" required>
+                <input type="text" class="otp-input" maxlength="1" required>
+                <input type="text" class="otp-input" maxlength="1" required>
+                <input type="text" class="otp-input" maxlength="1" required>
+            </div>
+            <button type="submit">Verify</button>
+        </form>
+    </div>
+    <script>
+        // login-otp.js
+        document.addEventListener('DOMContentLoaded', function() {
+            const otpForm = document.querySelector('form');
+            const urlParams = new URLSearchParams(window.location.search);
+            const identifier = urlParams.get('identifier');
+
+            // Handle OTP input
+            const otpInputs = document.querySelectorAll('.otp-input');
+            otpInputs.forEach((input, index) => {
+                input.addEventListener('input', (e) => {
+                    if (e.target.value && index < otpInputs.length - 1) {
+                        otpInputs[index + 1].focus();
+                    }
+                });
+
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                        otpInputs[index - 1].focus();
+                    }
+                });
+            });
+
+            otpForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const otp = Array.from(otpInputs).map(input => input.value).join('');
+
+                try {
+                    const response = await fetch('/verify-otp', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ identifier, otp }),
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        window.location.href = '/';  // Redirect to home page
+                    } else {
+                        alert(data.error);
+                    }
+                } catch (error) {
+                    alert('An error occurred. Please try again.');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
