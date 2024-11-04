@@ -13,6 +13,7 @@ from sklearn.experimental import enable_iterative_imputer  # noqa
 from sklearn.impute import IterativeImputer
 from sklearn.linear_model import BayesianRidge
 from sklearn.impute import KNNImputer
+import google.generativeai as genai
 
 app = Flask(__name__)
 app.secret_key = ''.join(random.choices(string.ascii_letters + string.digits, k=32))  # Secret key for sessions
@@ -22,6 +23,11 @@ UPLOAD_FOLDER = 'uploads'
 IMPUTED_FOLDER = 'imputed'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(IMPUTED_FOLDER, exist_ok=True)
+
+# Initialize Gemini
+GOOGLE_API_KEY = "AIzaSyDjCfjNeoJjk0RUxsLAHcbB8pUtdfRBTgE"  # Replace with your actual API key
+genai.configure(api_key=GOOGLE_API_KEY)
+model = genai.GenerativeModel('gemini-pro')
 
 # Configuration for email
 EMAIL_SERVER = "smtp.gmail.com"
@@ -219,6 +225,20 @@ def send_sms_otp(phone_number, otp):
         return False
 
 
+def get_gemini_response(prompt="", context=None):
+    """Get response from Gemini AI"""
+    try:
+        if context:
+            full_prompt = f"{context}\n{prompt}"
+        else:
+            full_prompt = prompt
+
+        response = model.generate_content(full_prompt)
+        return response.text
+    except Exception as e:
+        return f"I apologize, but I encountered an error: {str(e)}"
+
+
 @app.route('/')
 def home():
     if 'user_id' not in session:
@@ -296,6 +316,22 @@ def logout():
     return jsonify({'message': 'Logged out successfully'}), 200
 
 
+@app.route('/chat', methods=['POST'])
+def chat():
+    """Handle chat messages"""
+    data = request.json
+    message = data.get('message', '')
+
+    if not message:
+        return jsonify({'error': 'No message provided'}), 400
+
+    # Initial greeting
+    if any(greeting in message.lower() for greeting in ['hi', 'hello', 'hey']):
+        response = "Hello! I'm your AI assistant for data imputation. You canUpload your CSV file. Tell me which imputation method you'd like to use. I'll help you analyze the results!"
+        return jsonify({'response': response}), 200
+
+    return jsonify({'response': get_gemini_response(message)}), 200
+
 @app.route('/upload', methods=['POST'])
 def upload_file():
     if 'file' not in request.files:
@@ -314,36 +350,90 @@ def impute_data():
     file_name = data.get('file_name')
     prompt = data.get('prompt')
 
-    # Load the dataset
-    df = pd.read_csv(os.path.join(UPLOAD_FOLDER, file_name))
+    if not file_name or not prompt:
+        return jsonify({'error': 'Missing file name or prompt'}), 400
 
-    # Determine which function to use based on prompt
-    if "minmax" in prompt.lower():
-        imputed_df = minmax_impute(df)
-    elif "mode" in prompt.lower():
-        imputed_df = mode_imputation(df)
-    elif "mean" in prompt.lower():
-        imputed_df = mean_imputation(df)
-    elif "median" in prompt.lower():
-        imputed_df = median_imputation(df)
-    elif "forward fill" in prompt.lower():
-        imputed_df = forward_fill(df)
-    elif "backward fill" in prompt.lower():
-        imputed_df = backward_fill(df)
-    elif "knn" in prompt.lower():
-        imputed_df = knn_imputation(df)
-    elif "mice" in prompt.lower():
-        imputed_df = mice_imputation(df)
-    elif "bayesian" in prompt.lower():
-        imputed_df = bayesian_imputation(df)
-    else:
-        return jsonify({'error': 'please provide the imputation method'}), 400
+    try:
+        # Load the dataset
+        df = pd.read_csv(os.path.join(UPLOAD_FOLDER, file_name))
 
-    # Save the imputed file
-    imputed_file_path = os.path.join(IMPUTED_FOLDER, f'imputed_{file_name}')
-    imputed_df.to_csv(imputed_file_path, index=False)
+        # Determine which function to use based on prompt
+        method_used = ""
+        if "minmax" in prompt.lower():
+            imputed_df = minmax_impute(df)
+            method_used = "Min-Max"
+        elif "mode" in prompt.lower():
+            imputed_df = mode_imputation(df)
+            method_used = "Mode"
+        elif "mean" in prompt.lower():
+            imputed_df = mean_imputation(df)
+            method_used = "Mean"
+        elif "median" in prompt.lower():
+            imputed_df = median_imputation(df)
+            method_used = "Median"
+        elif "forward fill" in prompt.lower():
+            imputed_df = forward_fill(df)
+            method_used = "Forward Fill"
+        elif "backward fill" in prompt.lower():
+            imputed_df = backward_fill(df)
+            method_used = "Backward Fill"
+        elif "knn" in prompt.lower():
+            imputed_df = knn_imputation(df)
+            method_used = "KNN"
+        elif "mice" in prompt.lower():
+            imputed_df = mice_imputation(df)
+            method_used = "MICE"
+        elif "bayesian" in prompt.lower():
+            imputed_df = bayesian_imputation(df)
+            method_used = "Bayesian"
+        else:
+            return jsonify({'error': 'Please provide a valid imputation method'}), 400
 
-    return jsonify({'message': '{prompt}Imputation successful', 'imputed_file_name': f'imputed_{file_name}'}), 200
+        # Save the imputed file
+        imputed_file_name = f'imputed_{file_name}'
+        imputed_file_path = os.path.join(IMPUTED_FOLDER, imputed_file_name)
+        imputed_df.to_csv(imputed_file_path, index=False)
+
+        # Generate AI response about the imputation
+        context = f"""
+        File: {file_name}
+        Imputation Method: {method_used}
+        Original Size: {len(df)} rows × {len(df.columns)} columns
+        Missing Values Before: {df.isna().sum().sum()}
+        Missing Values After: {imputed_df.isna().sum().sum()}
+
+        Missing Data Imputation Report:
+        We have addressed the missing data in the {file_name} file using the {method_used} method.
+
+        Before Imputation:
+        - File contained {len(df)} rows and {len(df.columns)} columns
+        - There were {df.isna().sum().sum()} missing values across multiple columns
+
+        After Imputation:
+        - All missing values have been imputed
+        - The file now contains {len(imputed_df)} complete rows with no missing data
+
+        Instructions:
+        To use the imputed file, please download it from the provided link.
+        Please note that this imputed file contains estimated values for the missing data.
+        While {method_used} is a robust imputation method, it is important to use
+        caution when interpreting the results derived from imputed data.
+        """
+
+        ai_response = get_gemini_response(
+            "Generate a friendly response explaining what was done to the file and instruct the user to download the imputed file.",
+            context
+        )
+
+        return jsonify({
+            'message': 'Imputation successful',
+            'imputed_file_name': imputed_file_name,
+            'method_used': method_used,
+            'ai_response': ai_response
+        }), 200
+
+    except Exception as e:
+        return jsonify({'error': f'Error during imputation: {str(e)}'}), 500
 
 # Endpoint to download imputed files
 @app.route('/download/<filename>', methods=['GET'])
