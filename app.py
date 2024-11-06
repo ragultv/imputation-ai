@@ -242,9 +242,12 @@ def get_gemini_response(prompt="", context=None):
 @app.route('/')
 def home():
     if 'user_id' not in session:
-        return render_template('login.html')
+        return render_template('index.html')
     return render_template('home.html')
 
+@app.route('/login', methods=['GET'])
+def login_page():
+    return render_template('login.html')
 
 @app.route('/login', methods=['POST'])
 def login():
