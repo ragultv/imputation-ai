@@ -89,6 +89,44 @@
             color: #007bff;
             text-decoration: none;
         }
+
+        /* Mobile Responsive Styling */
+        @media (max-width: 768px) {
+            nav {
+                display: none; /* Hide navigation links on mobile */
+            }
+            header {
+                padding: 10px;
+            }
+            .logo {
+                font-size: 20px;
+            }
+            .hero {
+                padding: 50px 10px;
+                text-align: center;
+            }
+            .hero h1 {
+                font-size: 36px;
+            }
+            .hero p {
+                font-size: 16px;
+                margin-bottom: 20px;
+            }
+            .button-group {
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+            }
+            .cta-button {
+                width: auto;
+                padding: 8px 16px;
+                font-size: 16px;
+            }
+            /* Position logo on the left and login button on the right */
+            header {
+                justify-content: space-between;
+            }
+        }
     </style>
 </head>
 <body>
@@ -110,12 +148,11 @@
             <span class="secondary-highlight">Fill missing values</span> in seconds
         </h1>
         <p>
-            Imputation AI by Pinnacle Solutions offers powerful, AI-driven data imputation to handle missing values with ease. We ensure your datasets are complete, accurate, and ready for analysis - unlocking better insights and enhancing decision - making across industries. With Imputation AI, data integrity is just a click away.
+            Imputation AI by Pinnacle Solutions offers powerful, AI-driven data imputation to handle missing values with ease. We ensure your datasets are complete, accurate, and ready for analysis—unlocking better insights and enhancing decision-making across industries. With Imputation AI, data integrity is just a click away.
         </p>
         <div class="button-group">
             <button class="cta-button" onclick="window.location.href='/login'">GET STARTED</button>
         </div>
     </main>
-
 </body>
 </html>
