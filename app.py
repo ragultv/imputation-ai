@@ -239,9 +239,11 @@ def get_gemini_response(prompt="", context=None):
         return f"I apologize, but I encountered an error: {str(e)}"
 
 
-@app.route('/', methods=['GET'])
+@app.route('/')
 def home():
-    return render_template('index.html')
+    if 'user_id' not in session:
+        return render_template('index.html')
+    return render_template('home.html')
 
 @app.route('/login', methods=['GET'])
 def login_page():
