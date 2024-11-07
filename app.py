@@ -5,9 +5,10 @@ import random
 import string
 from datetime import datetime, timedelta
 import re
-import smtplib
-from email.mime.text import MIMEText
+from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+import smtplib
 from twilio.rest import Client
 from sklearn.experimental import enable_iterative_imputer  # noqa
 from sklearn.impute import IterativeImputer
@@ -188,22 +189,51 @@ def is_valid_phone(phone):
     return bool(phone_pattern.match(phone))
 
 
+
+
+
 def send_email_otp(email, otp):
-    """Send OTP via email"""
+    """Send OTP via email with Pinnacle logo"""
     try:
+        # Create the email message container
         msg = MIMEMultipart()
         msg['From'] = EMAIL_ADDRESS
         msg['To'] = email
-        msg['Subject'] = "Your OTP for Imp AI"
+        msg['Subject'] = "OTP for your Pinnacle sign-in"
 
-        body = f"We have received a sign-in attempt from your mail.\n \nYour OTP is: {otp}\nValid for 5 minutes."
-        msg.attach(MIMEText(body, 'plain'))
+        # HTML body with the Pinnacle logo embedded
+        body = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif; color: #333;">
+            <div style="text-align: center;">
+                <img src="cid:pinnacle_logo" alt="Pinnacle Logo" style="width: 150px;"/>
+            </div>
+            <h2 style="color: #1a73e8; text-align: center;">Hi there!</h2>
+            <p style="text-align: center;">Use the following one-time password (OTP) to sign in to your Pinnacle account.</p>
+            <p style="text-align: center;">This OTP will be valid for <strong>5 minutes</strong>:</p>
+            <h1 style="color: #333; font-size: 24px; text-align: center;">{otp}</h1>
+            <p style="text-align: center;">If you did not request this OTP, please ignore this email.</p>
+            <br>
+            <p style="text-align: center;">Regards,<br>The Pinnacle Team</p>
+        </body>
+        </html>
+        """
 
+        msg.attach(MIMEText(body, 'html'))
+
+        # Attach the Pinnacle logo as an image
+        with open('pinnacle.jpg', 'rb') as img_file:
+            img = MIMEImage(img_file.read())
+            img.add_header('Content-ID', '<pinnacle_logo>')
+            msg.attach(img)
+
+        # Sending email
         server = smtplib.SMTP(EMAIL_SERVER, EMAIL_PORT)
         server.starttls()
         server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
         server.send_message(msg)
         server.quit()
+
         return True
     except Exception as e:
         print(f"Error sending email: {e}")
@@ -330,7 +360,7 @@ def chat():
 
     # Initial greeting
     if any(greeting in message.lower() for greeting in ['hi', 'hello', 'hey']):
-        response = "Hello! I'm your AI assistant for data imputation. You canUpload your CSV file. Tell me which imputation method you'd like to use. I'll help you analyze the results!"
+        response = "Hello! I'm your AI assistant for data imputation. You can Upload your CSV file. Tell me which imputation method you'd like to use. I'll help you analyze the results!"
         return jsonify({'response': response}), 200
 
     return jsonify({'response': get_gemini_response(message)}), 200
