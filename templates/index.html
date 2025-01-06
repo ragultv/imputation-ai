@@ -3,13 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Imputation AI - Empowering Data with AI-Driven Imputation</title>
+    <title>Imp AI</title>
+    <link rel="icon" href="/static/impai1.png" type="image/png">
     <style>
         body {
+            min-height: 100vh;
             font-family: Arial, sans-serif;
+            justify-content: center;
+            align-items: center;
             margin: 0;
             padding: 0;
-            background-color: #ffffff;
+            Background: linear-gradient(180deg, #FFFFFF 40%, #5576A8 75%, #050D83 100%);
             color: #ffffff;
         }
         header {
@@ -17,8 +21,8 @@
             justify-content: space-between;
             align-items: center;
             padding: 20px;
-            background-color: #ffffff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            background:  transparent;
+            
         }
         .logo {
             font-size: 24px;
@@ -42,6 +46,7 @@
             color: white;
             padding: 10px 20px;
             border: none;
+
             border-radius: 5px;
             cursor: pointer;
             font-size: 16px;
@@ -53,7 +58,7 @@
         }
         .hero {
             text-align: left;
-            padding: 100px 20px;
+            padding: 10px 20px;
             color: #000000;
         }
         .hero h1 {
@@ -66,13 +71,16 @@
             max-width: 600px;
         }
         .highlight {
-            color: #FFD700;
+            color: #1101a0;
+            font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
         }
         .secondary-highlight {
-            color: #007bff;
+            color: #1101a0;
         }
         .button-group {
             display: flex;
+            justify-content: left;
+            align-items: left;
             gap: 20px;
         }
         .secondary-button {
@@ -103,7 +111,7 @@
             }
             .hero {
                 padding: 50px 10px;
-                text-align: center;
+                text-align: left;
             }
             .hero h1 {
                 font-size: 36px;
@@ -113,14 +121,15 @@
                 margin-bottom: 20px;
             }
             .button-group {
-                flex-direction: column;
-                align-items: center;
+                flex-direction: row;
+                align-items: left;
                 gap: 10px;
             }
             .cta-button {
                 width: auto;
                 padding: 8px 16px;
                 font-size: 16px;
+                
             }
             /* Position logo on the left and login button on the right */
             header {
@@ -130,18 +139,9 @@
     </style>
 </head>
 <body>
+    <img src="/static/impai.png" alt="Imputation AI Logo" style="height: 50px; width: 150px; margin-top: 20px;">
     <header>
-        <div class="logo">Imputation AI</div>
-        <nav>
-            <a href="#company">About Us</a>
-            <a href="#about">Company</a>
-            <a href="#tutorials">Tutorials</a>
-            <a href="#methods">Methods</a>
-            <a href="#methods">Contact Us</a>
-        </nav>
-        <button class="cta-button" onclick="window.location.href='/login'">Login</button>
     </header>
-
     <main class="hero">
         <h1>
             Welcome to <span class="highlight">IMP AI</span><br>
