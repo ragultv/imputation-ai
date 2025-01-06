@@ -118,7 +118,7 @@
             margin-bottom: 80px; /* Space for input area */
             position: relative;
             height: calc(100vh - 180px); /* Viewport height minus header and input area */
-                    
+            padding-bottom: 100px;       
         }
 
         .message {
@@ -184,6 +184,7 @@
             border: 1px solid transparent;
             border-radius: 8px;
             position: fixed;
+            margin-top: 10px;
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
@@ -264,17 +265,17 @@
         /* Mobile view adjustments */
         @media (max-width: 768px) {
             .container {
-                height: fit-content;
+                height: auto;
                 position: fixed;
                 padding: 10px;
                 width: 100%;
                 max-width: 100%;
             }
             .input-area {
+                margin-top: 10px;
                 padding: 10px;
                 flex-direction: row;
-                margin-top: 10px;
-                margin-bottom: 35px;
+                margin-bottom: 30px;
             }
 
             .prompt-input {
