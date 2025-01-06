@@ -56,7 +56,6 @@ def minmax_impute(df):
         df[col].fillna(midpoint, inplace=True)
     return df
 
-
 def knn_imputation(df, n_neighbors=5):
     """Impute missing values using KNN Imputation with data cleaning."""
 
@@ -87,7 +86,6 @@ def knn_imputation(df, n_neighbors=5):
     imputed_data = imputer.fit_transform(df)
 
     return pd.DataFrame(imputed_data, columns=df.columns)
-
 
 def mice_imputation(df):
     """Impute missing values using MICE with data cleaning."""
@@ -137,6 +135,7 @@ def bayesian_imputation(df):
             predicted_values = model.predict(predict_data)
             df.loc[df[col].isnull(), col] = predicted_values
     return df
+
 def mean_imputation(df):
     """Impute missing numeric values with the mean."""
     numeric_cols = df.select_dtypes(include=['number']).columns
@@ -162,7 +161,6 @@ def mode_imputation(df):
             df[col].fillna(mode_value, inplace=True)  # Fill missing values with mode
     return df
 
-
 def forward_fill(df):
     """Fill missing values with the last valid observation."""
     df.fillna(method='ffill', inplace=True)
@@ -172,25 +170,20 @@ def backward_fill(df):
     """Fill missing values with the next valid observation."""
     df.fillna(method='bfill', inplace=True)
     return df.round(2)
+
 def generate_otp():
     """Generate a 6-digit OTP"""
     return ''.join(random.choices(string.digits, k=6))
-
 
 def is_valid_email(email):
     """Validate email format"""
     email_pattern = re.compile(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
     return bool(email_pattern.match(email))
 
-
 def is_valid_phone(phone):
     """Validate phone number format"""
     phone_pattern = re.compile(r'^\+?1?\d{9,15}$')
     return bool(phone_pattern.match(phone))
-
-
-
-
 
 def send_email_otp(email, otp):
     """Send OTP via email with Pinnacle logo"""
@@ -199,7 +192,7 @@ def send_email_otp(email, otp):
         msg = MIMEMultipart()
         msg['From'] = EMAIL_ADDRESS
         msg['To'] = email
-        msg['Subject'] = "OTP for your Pinnacle sign-in"
+        msg['Subject'] = "OTP for your Imp AI sign-in"
 
         # HTML body with the Pinnacle logo embedded
         body = f"""
@@ -454,7 +447,7 @@ def impute_data():
         """
 
         ai_response = get_gemini_response(
-            "Generate a friendly response explaining what was done to the file and instruct the user to download the imputed file.",
+            "Generate a friendly response explaining what was done to the file,how the data imputed and  instruct the user to download the imputed file.",
             context
         )
 
