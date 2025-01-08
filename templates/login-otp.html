@@ -108,21 +108,25 @@
                 <input type="text" class="otp-input" maxlength="1" required>
             </div>
             <p class="resend-text">
-                if you didn't receive a code.<a href="#" class="resend-link">Resend</a>
+                If you didn't receive a code. 
+                <a href="#" class="resend-link">Resend</a>
+                <span id="resend-timer" style="display: none; color: gray;">( <span id="countdown">30</span> )</span>
             </p>
             <button type="submit" class="verify-btn">Verify</button>
-            
         </form>
     </div>
     <script>
-        // login-otp.js
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const otpForm = document.querySelector('form');
+            const resendLink = document.querySelector('.resend-link');
+            const resendTimer = document.getElementById('resend-timer');
+            const countdownSpan = document.getElementById('countdown');
+            const otpInputs = document.querySelectorAll('.otp-input');
             const urlParams = new URLSearchParams(window.location.search);
             const identifier = urlParams.get('identifier');
+            let countdownInterval;
 
-            // Handle OTP input
-            const otpInputs = document.querySelectorAll('.otp-input');
+            // OTP input focus handling
             otpInputs.forEach((input, index) => {
                 input.addEventListener('input', (e) => {
                     if (e.target.value && index < otpInputs.length - 1) {
@@ -137,11 +141,11 @@
                 });
             });
 
+            // Form submission for OTP verification
             otpForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
 
                 const otp = Array.from(otpInputs).map(input => input.value).join('');
-
                 try {
                     const response = await fetch('/verify-otp', {
                         method: 'POST',
@@ -154,7 +158,7 @@
                     const data = await response.json();
 
                     if (response.ok) {
-                        window.location.href = '/';  // Redirect to home page
+                        window.location.href = '/'; // Redirect to home page
                     } else {
                         alert(data.error);
                     }
@@ -162,6 +166,50 @@
                     alert('An error occurred. Please try again.');
                 }
             });
+
+            // Resend OTP functionality
+            resendLink.addEventListener('click', async (e) => {
+                e.preventDefault();
+
+                try {
+                    const response = await fetch('/resend-otp', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ identifier }),
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        
+                        startResendTimer(30); // Start 30-second cooldown
+                    } else {
+                        alert(data.error || 'Failed to resend OTP. Please try again.');
+                    }
+                } catch (error) {
+                    alert('An error occurred while resending OTP. Please try again.');
+                }
+            });
+
+            // Start a countdown timer for Resend OTP
+            function startResendTimer(seconds) {
+                resendLink.style.pointerEvents = 'none';
+                resendTimer.style.display = 'inline';
+                countdownSpan.textContent = seconds;
+
+                countdownInterval = setInterval(() => {
+                    seconds--;
+                    countdownSpan.textContent = seconds;
+
+                    if (seconds <= 0) {
+                        clearInterval(countdownInterval);
+                        resendTimer.style.display = 'none';
+                        resendLink.style.pointerEvents = 'auto';
+                    }
+                }, 1000);
+            }
         });
     </script>
 </body>
