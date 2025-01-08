@@ -303,6 +303,41 @@ def login():
 
     return jsonify({'error': 'Invalid email or phone number format'}), 400
 
+@app.route('/resend-otp', methods=['POST'])
+def resend_otp():
+    data = request.json
+    identifier = data.get('identifier')  # Email or phone number
+
+    if not identifier:
+        return jsonify({'error': 'Please provide email or phone number'}), 400
+
+    # Check if identifier exists in the OTP store
+    if identifier not in otp_store:
+        return jsonify({'error': 'No OTP request found for this identifier'}), 404
+
+    # Generate new OTP
+    otp = generate_otp()
+    expiry_time = datetime.now() + timedelta(minutes=5)
+
+    # Update OTP store with new OTP and expiry time
+    otp_store[identifier] = {
+        'otp': otp,
+        'expiry': expiry_time
+    }
+
+    # Resend OTP based on identifier type
+    if is_valid_email(identifier):
+        if send_email_otp(identifier, otp):
+            return jsonify({'message': 'OTP resent to email'}), 200
+        return jsonify({'error': 'Failed to resend OTP email'}), 500
+
+    elif is_valid_phone(identifier):
+        if send_sms_otp(identifier, otp):
+            return jsonify({'message': 'OTP resent to phone'}), 200
+        return jsonify({'error': 'Failed to resend OTP SMS'}), 500
+
+    return jsonify({'error': 'Invalid email or phone number format'}), 400
+
 @app.route('/login-otp', methods=['GET'])
 def login_otp():
     identifier = request.args.get('identifier')
