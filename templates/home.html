@@ -162,16 +162,34 @@
         }
 
         .user-message {
-            background-color: #d9d9d9;
-            padding: 7px;
+            background-color: #ffffff;
+            padding: 5px;
             margin-left: auto;
             color: #000000;
-            border: 2px solid #000000;
+            border: 2px solid #d9d9d9;
             min-width: 60px;
-            text-align: left;
-            
+            text-align: center; /* Changed from left to center */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 20px;
         }
-        .message-content {
+
+        .user-message > div {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+
+        .user-message img {
+            vertical-align: middle;
+        }
+
+        .user-message span {
+            vertical-align: middle;
+        }
+                .message-content {
             padding-left: 10px;
         }
 
@@ -334,20 +352,17 @@
             messageDiv.className = `message ${type}-message`;
             
             if (type === 'system') {
-                // Create rectangle container
+                // System message handling (unchanged)
                 const rectangle = document.createElement('div');
                 rectangle.className = 'system-message-rectangle';
                 
-                // Create logo image
                 const logo = document.createElement('img');
                 logo.src = '/static/impai1.png';
                 logo.alt = 'AI Logo';
                 logo.className = 'message-logo';
                 
-                // Add logo to rectangle
                 rectangle.appendChild(logo);
                 
-                // Create content container
                 const contentDiv = document.createElement('div');
                 contentDiv.className = 'message-content';
                 
@@ -357,14 +372,48 @@
                     contentDiv.textContent = content;
                 }
                 
-                // Add rectangle and content to message
                 messageDiv.appendChild(rectangle);
                 messageDiv.appendChild(contentDiv);
             } else {
-                // For user messages, keep the original behavior
-                if (content.includes('<a')) {
-                    messageDiv.innerHTML = content;
+                const contentContainer = document.createElement('div');
+                contentContainer.style.cssText = `
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    width: 100%;
+                `
+                // For file upload messages
+                if (content instanceof HTMLElement) {
+                    const fileContainer = document.createElement('div');
+                    fileContainer.style.cssText = `
+                        background: white;
+                        border-radius: 8px;
+                        padding: 8px 16px;
+                        display: flex;
+                        align-items: center;
+                        gap: 10px;
+                    `;
+
+                    const fileIcon = document.createElement('img');
+                    fileIcon.src = '/static/fileupload_icon.png';
+                    fileIcon.alt = 'File';
+                    fileIcon.style.cssText = `
+                        width: 30px;
+                        height: 30px;
+                    `;
+
+                    const fileName = document.createElement('span');
+                    fileName.textContent = content.textContent || '';
+                    fileName.style.cssText = `
+                        color: black;
+                        font-size: 14px;
+                    `;
+
+                    fileContainer.appendChild(fileIcon);
+                    fileContainer.appendChild(fileName);
+                    messageDiv.appendChild(fileContainer);
                 } else {
+                    // Regular user message
                     messageDiv.textContent = content;
                 }
             }
@@ -372,6 +421,7 @@
             chatArea.appendChild(messageDiv);
             chatArea.scrollTop = chatArea.scrollHeight;
         }
+
 
         function typeMessage(content, type = 'system') {
             const messageDiv = document.createElement('div');
@@ -443,6 +493,7 @@
             fileInput.click();
         });
 
+        // Update file input handler
         fileInput.addEventListener('change', async (event) => {
             const file = event.target.files[0];
             if (!file) return;
@@ -451,9 +502,13 @@
             formData.append('file', file);
 
             try {
-                addMessage(`${file.name}`, 'user');
+                const fileMessageDiv = document.createElement('div');
+                fileMessageDiv.textContent = file.name;
+                addMessage(fileMessageDiv, 'user');
+                
                 uploadBtn.disabled = true;
                 uploadBtn.classList.add('disabled');
+
                 const response = await fetch('/upload', {
                     method: 'POST',
                     body: formData
@@ -463,8 +518,7 @@
 
                 if (response.ok) {
                     uploadedFileName = data.file_name;
-                    typeMessage(`File "${data.file_name}" uploaded successfully.Please provide imputation instructions. Available methods: mean, median, mode, minmax, forward fill, backward fill, KNN, MICE, or Bayesian.`);
-                    //addMessage('Please provide imputation instructions. Available methods: mean, median, mode, minmax, forward fill, backward fill, KNN, MICE, or Bayesian.');
+                    typeMessage(`File "${data.file_name}" uploaded successfully. Please provide imputation instructions. Available methods: mean, median, mode, minmax, forward fill, backward fill, KNN, MICE, or Bayesian.`);
                     promptInput.disabled = false;
                     sendBtn.disabled = false;
                     promptInput.focus();
@@ -478,7 +532,6 @@
                 uploadBtn.classList.remove('disabled');
             }
         });
-
         promptInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
