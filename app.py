@@ -45,7 +45,40 @@ TWILIO_PHONE_NUMBER = "+14708237104"  # Replace with your Twilio phone number
 otp_store = {}
 
 
-# Function definitions
+# Function to retrieve dataset features
+def get_dataset_features(df):
+    """
+    Function to retrieve dataset features, including rows, columns, 
+    categorical and numerical data, and the first few rows of the dataset.
+
+    Args:
+        dataframe (pd.DataFrame): The dataset as a pandas DataFrame.
+
+    Returns:
+        dict: A dictionary containing dataset information.
+    """
+    dataset_info = {}
+    
+    # Number of rows and columns
+    dataset_info['Number of Rows'] = df.shape[0]
+    dataset_info['Number of Columns'] = df.shape[1]
+
+    # size and missing vales 
+    dataset_info['Original size'] = f"{len(df)} * {len(df.columns)}"
+    dataset_info['missing values'] = df.isnull().sum().sum()
+    
+    # Categorical and numerical columns
+    #categorical_cols = df.select_dtypes(include=['object', 'category']).columns.tolist()
+    numerical_cols = df.select_dtypes(include=['int64', 'float64']).columns.tolist()
+    #dataset_info['Categorical Columns'] = categorical_cols
+    dataset_info['Numerical Columns'] = numerical_cols
+    
+    # Head of the dataset
+    dataset_info['Dataset Head'] = df.head()
+    
+    return dataset_info
+
+# Function to impute missing values with the midpoint of min and max
 def minmax_impute(df):
     """Impute missing numeric values with the midpoint of min and max."""
     numeric_cols = df.select_dtypes(include=['number']).columns
@@ -56,6 +89,7 @@ def minmax_impute(df):
         df[col].fillna(midpoint, inplace=True)
     return df
 
+# Function to impute missing values using KNN Imputation
 def knn_imputation(df, n_neighbors=5):
     """Impute missing values using KNN Imputation with data cleaning."""
 
@@ -87,6 +121,7 @@ def knn_imputation(df, n_neighbors=5):
 
     return pd.DataFrame(imputed_data, columns=df.columns)
 
+# Function to impute missing values using MICE
 def mice_imputation(df):
     """Impute missing values using MICE with data cleaning."""
 
@@ -118,9 +153,10 @@ def mice_imputation(df):
 
     return pd.DataFrame(imputed_data, columns=df.columns)
 
+# Function to impute missing values using Bayesian Ridge regression
 def bayesian_imputation(df):
     """Impute missing values using Bayesian Imputation (simple approach)."""
-    # Assume numeric data and use Bayesian Ridge regression for imputation
+    
     for col in df.columns:
         if df[col].isnull().any():
             model = BayesianRidge()
@@ -136,6 +172,7 @@ def bayesian_imputation(df):
             df.loc[df[col].isnull(), col] = predicted_values
     return df
 
+# Function to impute missing values with the mean
 def mean_imputation(df):
     """Impute missing numeric values with the mean."""
     numeric_cols = df.select_dtypes(include=['number']).columns
@@ -144,6 +181,7 @@ def mean_imputation(df):
         df[col].fillna(mean_value, inplace=True)  # Fill missing values with mean
     return df
 
+# Function to impute missing values with the median
 def median_imputation(df):
     """Impute missing numeric values with the median."""
     numeric_cols = df.select_dtypes(include=['number']).columns
@@ -152,6 +190,7 @@ def median_imputation(df):
         df[col].fillna(median_value, inplace=True)  # Fill missing values with median
     return df
 
+# Function to fill missing values with the mode
 def mode_imputation(df):
     """Impute missing non-numeric values with the mode."""
     non_numeric_cols = df.select_dtypes(exclude=['number']).columns
@@ -161,30 +200,36 @@ def mode_imputation(df):
             df[col].fillna(mode_value, inplace=True)  # Fill missing values with mode
     return df
 
+# Function to fill missing values with the last valid observation
 def forward_fill(df):
     """Fill missing values with the last valid observation."""
     df.fillna(method='ffill', inplace=True)
     return df.round(2)
 
+# Function to fill missing values with the next valid observation
 def backward_fill(df):
     """Fill missing values with the next valid observation."""
     df.fillna(method='bfill', inplace=True)
     return df.round(2)
 
+#function to generate OTP
 def generate_otp():
     """Generate a 6-digit OTP"""
     return ''.join(random.choices(string.digits, k=6))
 
+#function to validate email
 def is_valid_email(email):
     """Validate email format"""
     email_pattern = re.compile(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
     return bool(email_pattern.match(email))
 
+#function to validate phone number
 def is_valid_phone(phone):
     """Validate phone number format"""
     phone_pattern = re.compile(r'^\+?1?\d{9,15}$')
     return bool(phone_pattern.match(phone))
 
+#function to send OTP via email
 def send_email_otp(email, otp):
     """Send OTP via email with Pinnacle logo"""
     try:
@@ -232,7 +277,7 @@ def send_email_otp(email, otp):
         print(f"Error sending email: {e}")
         return False
 
-
+#function to send OTP via SMS
 def send_sms_otp(phone_number, otp):
     """Send OTP via SMS using Twilio"""
     try:
@@ -247,7 +292,7 @@ def send_sms_otp(phone_number, otp):
         print(f"Error sending SMS: {e}")
         return False
 
-
+#function to get response from Gemini AI
 def get_gemini_response(prompt="", context=None):
     """Get response from Gemini AI"""
     try:
@@ -261,17 +306,19 @@ def get_gemini_response(prompt="", context=None):
     except Exception as e:
         return f"I apologize, but I encountered an error: {str(e)}"
 
-
+#enpoint to render home page
 @app.route('/')
 def home():
     if 'user_id' not in session:
         return render_template('index.html')
     return render_template('home.html')
 
+#endpoint to render login page
 @app.route('/login', methods=['GET'])
 def login_page():
     return render_template('login.html')
 
+#endpoint to handle login
 @app.route('/login', methods=['POST'])
 def login():
     data = request.json
@@ -303,6 +350,7 @@ def login():
 
     return jsonify({'error': 'Invalid email or phone number format'}), 400
 
+#endpoint to resend OTP
 @app.route('/resend-otp', methods=['POST'])
 def resend_otp():
     data = request.json
@@ -338,6 +386,7 @@ def resend_otp():
 
     return jsonify({'error': 'Invalid email or phone number format'}), 400
 
+#endpoint to render OTP verification page
 @app.route('/login-otp', methods=['GET'])
 def login_otp():
     identifier = request.args.get('identifier')
@@ -345,6 +394,7 @@ def login_otp():
         return render_template('login-otp.html', identifier=identifier)
     return jsonify({'error': 'Identifier not provided'}), 400
 
+#endpoint to verify OTP
 @app.route('/verify-otp', methods=['POST'])
 def verify_otp():
     data = request.json
@@ -370,13 +420,13 @@ def verify_otp():
 
     return jsonify({'error': 'Invalid OTP'}), 400
 
-
+#endpoint to logout
 @app.route('/logout', methods=['POST'])
 def logout():
     session.pop('user_id', None)
     return jsonify({'message': 'Logged out successfully'}), 200
 
-
+#endpoint to handle chat messages
 @app.route('/chat', methods=['POST'])
 def chat():
     """Handle chat messages"""
@@ -393,16 +443,45 @@ def chat():
 
     return jsonify({'response': get_gemini_response(message)}), 200
 
+
+#endpoint to upload the dataset
 @app.route('/upload', methods=['POST'])
 def upload_file():
     if 'file' not in request.files:
         return jsonify({'error': 'No file part'}), 400
+
     file = request.files['file']
     if file.filename == '':
         return jsonify({'error': 'No selected file'}), 400
+
     filepath = os.path.join(UPLOAD_FOLDER, file.filename)
     file.save(filepath)
-    return jsonify({'message': 'File uploaded successfully', 'file_name': file.filename}), 200
+
+    try:
+        df = pd.read_csv(filepath)
+        features = get_dataset_features(df)
+        context = f"The dataset has the following features: {features}"
+        ai_response = get_gemini_response(
+            """
+            Generate a structured response analyzing the dataset without using markdown. Use numbered headings, plain text for sections, and no special characters like `#` or `*`.
+
+            • State the number of rows, columns, and total data points with sentence.
+            • Explain what the rows and columns represent .
+            • Mention the total number of missing values and their distribution among columns.
+            • Suggest the best imputation method for the dataset and explain why.
+        
+            """,
+            context
+        )
+    
+        return jsonify({
+            'message': 'File uploaded successfully',
+            'file_name': file.filename,
+            'ai_suggestion': ai_response
+        }), 200
+    except Exception as e:
+        return jsonify({'error': f"An error occurred: {e}"}), 500
+
 
 # Endpoint to handle imputation based on prompt
 @app.route('/impute', methods=['POST'])
@@ -457,7 +536,6 @@ def impute_data():
 
         # Generate AI response about the imputation
         context = f"""
-        File: {file_name}
         Imputation Method: {method_used}
         Original Size: {len(df)} rows × {len(df.columns)} columns
         Missing Values Before: {df.isna().sum().sum()}
@@ -481,10 +559,12 @@ def impute_data():
         caution when interpreting the results derived from imputed data.
         """
 
+
         ai_response = get_gemini_response(
-            "Generate a friendly response explaining what was done to the file,how the data imputed and  instruct the user to download the imputed file.",
+            "generate the  structured response that how the missing values are imputed using the choosen method without using markdown. Use numbered headings, plain text for sections, and no special characters like `#` or `*` .",
             context
         )
+
 
         return jsonify({
             'message': 'Imputation successful',
