@@ -163,7 +163,7 @@
 
         .user-message {
             background-color: #ffffff;
-            padding: 5px;
+            padding: 7px;
             margin-left: auto;
             color: #000000;
             border: 2px solid #d9d9d9;
@@ -172,7 +172,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            border-radius: 20px;
+            border-radius: 25px;
         }
 
         .user-message > div {
@@ -380,7 +380,8 @@
                     display: flex;
                     justify-content: center;
                     align-items: center;
-                    width: 100%;
+                    width: 85%;
+                    padding: 10px;
                 `
                 // For file upload messages
                 if (content instanceof HTMLElement) {
@@ -473,7 +474,7 @@
                     } else {
                         clearInterval(typingInterval);
                     }
-                }, 50);
+                }, 30);
             } else {
                 chatArea.appendChild(messageDiv);
                 let index = 0;
@@ -485,7 +486,7 @@
                     } else {
                         clearInterval(typingInterval);
                     }
-                }, 50);
+                }, 30);
             }
         }
 
@@ -518,7 +519,7 @@
 
                 if (response.ok) {
                     uploadedFileName = data.file_name;
-                    typeMessage(`File "${data.file_name}" uploaded successfully. Please provide imputation instructions. Available methods: mean, median, mode, minmax, forward fill, backward fill, KNN, MICE, or Bayesian.`);
+                    typeMessage(`You have uploaded a file named "${data.file_name}" . ` +` ${data.ai_suggestion}`, 'system')
                     promptInput.disabled = false;
                     sendBtn.disabled = false;
                     promptInput.focus();
@@ -526,7 +527,7 @@
                     throw new Error(data.error || 'Upload failed');
                 }
             } catch (error) {
-                addMessage(`Error: ${error.message}`);
+                addMessage(` ${error.message}`);
             } finally {
                 uploadBtn.disabled = false;
                 uploadBtn.classList.remove('disabled');
