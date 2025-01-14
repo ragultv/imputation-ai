@@ -465,9 +465,6 @@ def upload_file():
             """
             Generate a structured response analyzing the dataset without using markdown. Use numbered headings, plain text for sections, and no special characters like `#` or `*`.
             
-             State the number of rows, columns, and total data points with sentence.
-             Explain what the rows and columns represent .
-             Mention the total number of missing values and their distribution among columns.
              Suggest the best imputation method for the dataset and explain why.
         
             """,
@@ -537,19 +534,19 @@ def impute_data():
         # Generate AI response about the imputation
         context = f"""
         Imputation Method: {method_used}
-        how the missing values are imputed using the choosen method.
         """
 
-
         ai_response = get_gemini_response(
-            "Generate a structured response analyzing the dataset without using markdown. Use numbered headings, plain text for sections, and no special characters like `#` or `*` .how the missing values are imputed using the choosen method"
+            """
+            Generate a structured response analyzing the dataset without using markdown. Use numbered headings, plain text for sections, and no special characters like `#` or `*`.
             
-            ,
-            
+             how the missing values are imputed using the choosen method.
+        
+            """,
             context
         )
-
-
+    
+       
         return jsonify({
             'message': 'Imputation successful',
             'imputed_file_name': imputed_file_name,
