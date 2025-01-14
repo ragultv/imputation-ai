@@ -464,11 +464,11 @@ def upload_file():
         ai_response = get_gemini_response(
             """
             Generate a structured response analyzing the dataset without using markdown. Use numbered headings, plain text for sections, and no special characters like `#` or `*`.
-
-            • State the number of rows, columns, and total data points with sentence.
-            • Explain what the rows and columns represent .
-            • Mention the total number of missing values and their distribution among columns.
-            • Suggest the best imputation method for the dataset and explain why.
+            
+             State the number of rows, columns, and total data points with sentence.
+             Explain what the rows and columns represent .
+             Mention the total number of missing values and their distribution among columns.
+             Suggest the best imputation method for the dataset and explain why.
         
             """,
             context
@@ -537,31 +537,15 @@ def impute_data():
         # Generate AI response about the imputation
         context = f"""
         Imputation Method: {method_used}
-        Original Size: {len(df)} rows × {len(df.columns)} columns
-        Missing Values Before: {df.isna().sum().sum()}
-        Missing Values After: {imputed_df.isna().sum().sum()}
-
-        Missing Data Imputation Report:
-        We have addressed the missing data in the {file_name} file using the {method_used} method.
-
-        Before Imputation:
-        - File contained {len(df)} rows and {len(df.columns)} columns
-        - There were {df.isna().sum().sum()} missing values across multiple columns
-
-        After Imputation:
-        - All missing values have been imputed
-        - The file now contains {len(imputed_df)} complete rows with no missing data
-
-        Instructions:
-        To use the imputed file, please download it from the provided link.
-        Please note that this imputed file contains estimated values for the missing data.
-        While {method_used} is a robust imputation method, it is important to use
-        caution when interpreting the results derived from imputed data.
+        how the missing values are imputed using the choosen method.
         """
 
 
         ai_response = get_gemini_response(
-            "generate the  structured response that how the missing values are imputed using the choosen method without using markdown. Use numbered headings, plain text for sections, and no special characters like `#` or `*` .",
+            "Generate a structured response analyzing the dataset without using markdown. Use numbered headings, plain text for sections, and no special characters like `#` or `*` .how the missing values are imputed using the choosen method"
+            
+            ,
+            
             context
         )
 
