@@ -271,6 +271,60 @@
             font-weight: bold;
         }
 
+
+        /* Add these new styles for AI response formatting */
+        .system-message .message-content h2 {
+            font-size: 24px;
+            color: #000000;
+            margin: 0 0 10px 0;
+            margin-top: -5px;
+            
+        }
+
+        .system-message .message-content h3 {
+            font-size: 18px;
+            color: #000000;
+            margin: 15px 0 8px 0;
+            
+        }
+
+        .system-message .message-content p {
+            font-size: 16px;
+            line-height: 1.6;
+            margin: 8px 0;
+            color: #000000;
+        }
+
+        .system-message .message-content ul {
+            margin: 8px 0 8px 20px;
+        }
+
+        .system-message .message-content li {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #000000;
+            margin: 4px 0;
+        }
+
+        .system-message .message-content .ai-response {
+            background-color: #ffffff;
+            padding: 0;
+            border-radius: 8px;
+            
+        }
+
+        .system-message .message-content a.download-link {
+            display: inline-block;
+            color: #1a73e8;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .system-message .message-content a.download-link:hover {
+            text-decoration: underline;
+        }
+
         .download-link:hover {
             text-decoration: underline;
         }
@@ -453,40 +507,31 @@
                 chatArea.appendChild(messageDiv);
                 chatArea.scrollTop = chatArea.scrollHeight;
 
-                let index = 0;
-                const linkRegex = /<a [^>]+>.*?<\/a>/;
-                const linkMatch = content.match(linkRegex);
-                const plainText = linkMatch ? content.replace(linkMatch[0], '') : content;
-                const linkHtml = linkMatch ? linkMatch[0] : '';
+                // Split content into HTML and download link
+                const parts = content.split(/<a\s+href="/);
+                const mainContent = parts[0];
+                const linkPart = parts.length > 1 ? '<a href="' + parts[1] : '';
 
+                // Type the main content with HTML
+                let index = 0;
                 const typingInterval = setInterval(() => {
-                    if (index < plainText.length) {
-                        contentDiv.textContent += plainText[index];
+                    if (index < mainContent.length) {
+                        contentDiv.innerHTML = mainContent.substring(0, index + 1);
                         chatArea.scrollTop = chatArea.scrollHeight;
                         index++;
-                    } else if (linkHtml && !contentDiv.innerHTML.includes(linkHtml)) {
-                        const tempDiv = document.createElement('div');
-                        tempDiv.innerHTML = linkHtml;
-                        const linkElement = tempDiv.firstChild;
-                        contentDiv.appendChild(linkElement);
-                        chatArea.scrollTop = chatArea.scrollHeight;
-                        clearInterval(typingInterval);
                     } else {
+                        // After main content is typed, add the download link if it exists
+                        if (linkPart) {
+                            contentDiv.innerHTML += linkPart;
+                        }
                         clearInterval(typingInterval);
                     }
                 }, 30);
             } else {
+                // Handle user messages (unchanged)
+                messageDiv.textContent = content;
                 chatArea.appendChild(messageDiv);
-                let index = 0;
-                const typingInterval = setInterval(() => {
-                    if (index < content.length) {
-                        messageDiv.textContent += content[index];
-                        chatArea.scrollTop = chatArea.scrollHeight;
-                        index++;
-                    } else {
-                        clearInterval(typingInterval);
-                    }
-                }, 30);
+                chatArea.scrollTop = chatArea.scrollHeight;
             }
         }
 
