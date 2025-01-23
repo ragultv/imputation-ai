@@ -461,26 +461,32 @@ def upload_file():
         df = pd.read_csv(filepath)
         features = get_dataset_features(df)
         context = f"The dataset has the following features: {features}"
+        
         ai_response = get_gemini_response(
             """
-            Generate a structured response analyzing the dataset without using markdown. Use numbered headings, plain text for sections, and no special characters like `#` or `*`.
-            
-             Suggest the best imputation method for the dataset and explain why.
+             1.Use <p> tags for paragraphs.
+             2.suggest the only onebest imputation method for the dataset.
         
             """,
             context
         )
+        formatted_response = f"""
+        <div class='ai-response'>
+            {ai_response}
+        </div>
+        """
     
         return jsonify({
             'message': 'File uploaded successfully',
             'file_name': file.filename,
-            'ai_suggestion': ai_response
+            'ai_suggestion': formatted_response
         }), 200
     except Exception as e:
         return jsonify({'error': f"An error occurred: {e}"}), 500
 
 
 # Endpoint to handle imputation based on prompt
+
 @app.route('/impute', methods=['POST'])
 def impute_data():
     data = request.json
@@ -493,38 +499,43 @@ def impute_data():
     try:
         # Load the dataset
         df = pd.read_csv(os.path.join(UPLOAD_FOLDER, file_name))
+        
+        # Get dataset features for context
+        features = get_dataset_features(df)
+        
+        # Ask Gemini to analyze the prompt and suggest imputation method
+        analysis_prompt = f"""
+        Based on the following information, determine the most appropriate imputation method:
+        
+        User prompt: {prompt}
+        Dataset features: {features}
+        
+        Choose one of these methods: minmax, mode, mean, median, forward fill, backward fill, knn, mice, bayesian
+        
+        Return only the method name in lowercase, without any additional text or explanation.
+        """
+        
+        method = get_gemini_response(analysis_prompt).strip().lower()
 
-        # Determine which function to use based on prompt
-        method_used = ""
-        if "minmax" in prompt.lower():
-            imputed_df = minmax_impute(df)
-            method_used = "Min-Max"
-        elif "mode" in prompt.lower():
-            imputed_df = mode_imputation(df)
-            method_used = "Mode"
-        elif "mean" in prompt.lower():
-            imputed_df = mean_imputation(df)
-            method_used = "Mean"
-        elif "median" in prompt.lower():
-            imputed_df = median_imputation(df)
-            method_used = "Median"
-        elif "forward fill" in prompt.lower():
-            imputed_df = forward_fill(df)
-            method_used = "Forward Fill"
-        elif "backward fill" in prompt.lower():
-            imputed_df = backward_fill(df)
-            method_used = "Backward Fill"
-        elif "knn" in prompt.lower():
-            imputed_df = knn_imputation(df)
-            method_used = "KNN"
-        elif "mice" in prompt.lower():
-            imputed_df = mice_imputation(df)
-            method_used = "MICE"
-        elif "bayesian" in prompt.lower():
-            imputed_df = bayesian_imputation(df)
-            method_used = "Bayesian"
-        else:
-            return jsonify({'error': 'Please provide a valid imputation method'}), 400
+        # Map methods to functions
+        imputation_methods = {
+            'minmax': (minmax_impute, "Min-Max"),
+            'mode': (mode_imputation, "Mode"),
+            'mean': (mean_imputation, "Mean"),
+            'median': (median_imputation, "Median"),
+            'forward fill': (forward_fill, "Forward Fill"),
+            'backward fill': (backward_fill, "Backward Fill"),
+            'knn': (knn_imputation, "KNN"),
+            'mice': (mice_imputation, "MICE"),
+            'bayesian': (bayesian_imputation, "Bayesian")
+        }
+
+        if method not in imputation_methods:
+            return jsonify({'error': 'Invalid imputation method suggested'}), 400
+
+        # Apply the chosen imputation method
+        impute_func, method_used = imputation_methods[method]
+        imputed_df = impute_func(df)
 
         # Save the imputed file
         imputed_file_name = f'imputed_{file_name}'
@@ -534,28 +545,46 @@ def impute_data():
         # Generate AI response about the imputation
         context = f"""
         Imputation Method: {method_used}
+        File Name: {file_name}
+        Original Dataset Features: {features}
+        User's Original Request: {prompt}
         """
 
         ai_response = get_gemini_response(
             """
-            Generate a structured response analyzing the dataset without using markdown. Use numbered headings, plain text for sections, and no special characters like `#` or `*`.
-            
-             how the missing values are imputed using the choosen method.
-        
+            Generate a structured response with the following format:
+            1. Use <h2> tags for main headings
+            2. Use <h3> tags for subheadings
+            3. Use <p> tags for paragraphs
+            4. Use <ul> and <li> tags for bullet points
+            5. Include the following sections:
+               - Method Selection
+               - Implementation Details
+               - Benefits and Advantages
+               - Results Summary
+            Make the response visually organized and easy to read.
             """,
             context
         )
-    
-       
+
+
+                # Format the response with HTML
+        formatted_response = f"""
+        <div class='ai-response'>
+            {ai_response}
+        </div>
+        """
+
         return jsonify({
             'message': 'Imputation successful',
             'imputed_file_name': imputed_file_name,
             'method_used': method_used,
-            'ai_response': ai_response
+            'ai_response': formatted_response
         }), 200
 
     except Exception as e:
         return jsonify({'error': f'Error during imputation: {str(e)}'}), 500
+
 
 # Endpoint to download imputed files
 @app.route('/download/<filename>', methods=['GET'])
