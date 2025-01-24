@@ -465,7 +465,8 @@ def upload_file():
         ai_response = get_gemini_response(
             """
              1.Use <p> tags for paragraphs.
-             2.suggest the only onebest imputation method for the dataset.
+             2.only suggest the  one best imputation method.
+             3.only return the method name in uppercase with bold, without any additional text or explanation.
         
             """,
             context
