@@ -564,7 +564,7 @@
 
                 if (response.ok) {
                     uploadedFileName = data.file_name;
-                    typeMessage(`You have uploaded a file named "${data.file_name}" . ` +` ${data.ai_suggestion}`, 'system')
+                    typeMessage(`You have uploaded a file named "${data.file_name}". ` +` ${data.ai_suggestion}`, 'system')
                     promptInput.disabled = false;
                     sendBtn.disabled = false;
                     promptInput.focus();
