@@ -87,7 +87,7 @@ def minmax_impute(df):
         max_value = df[col].max()
         midpoint = (min_value + max_value) / 2
         df[col].fillna(midpoint, inplace=True)
-    return df
+    return df.round(2)
 
 # Function to impute missing values using KNN Imputation
 def knn_imputation(df, n_neighbors=5):
@@ -119,7 +119,7 @@ def knn_imputation(df, n_neighbors=5):
     imputer = KNNImputer(n_neighbors=n_neighbors)
     imputed_data = imputer.fit_transform(df)
 
-    return pd.DataFrame(imputed_data, columns=df.columns)
+    return pd.DataFrame(imputed_data, columns=df.columns).round(2)
 
 # Function to impute missing values using MICE
 def mice_imputation(df):
@@ -151,7 +151,7 @@ def mice_imputation(df):
     imputer = IterativeImputer()
     imputed_data = imputer.fit_transform(df)
 
-    return pd.DataFrame(imputed_data, columns=df.columns)
+    return pd.DataFrame(imputed_data, columns=df.columns).round(2)
 
 # Function to impute missing values using Bayesian Ridge regression
 def bayesian_imputation(df):
@@ -170,7 +170,7 @@ def bayesian_imputation(df):
             predict_data = df[df[col].isnull()].drop(col, axis=1).fillna(df.mean())
             predicted_values = model.predict(predict_data)
             df.loc[df[col].isnull(), col] = predicted_values
-    return df
+    return df.round(2)
 
 # Function to impute missing values with the mean
 def mean_imputation(df):
@@ -179,7 +179,7 @@ def mean_imputation(df):
     for col in numeric_cols:
         mean_value = df[col].mean()  # Calculate mean
         df[col].fillna(mean_value, inplace=True)  # Fill missing values with mean
-    return df
+    return df.round(2)
 
 # Function to impute missing values with the median
 def median_imputation(df):
@@ -188,7 +188,7 @@ def median_imputation(df):
     for col in numeric_cols:
         median_value = df[col].median()  # Calculate median
         df[col].fillna(median_value, inplace=True)  # Fill missing values with median
-    return df
+    return df.round(2)
 
 # Function to fill missing values with the mode
 def mode_imputation(df):
@@ -198,7 +198,7 @@ def mode_imputation(df):
         if df[col].dropna().size > 0:  # Check if there are non-null values to calculate mode
             mode_value = df[col].mode()[0]  # Calculate mode using pandas' mode() function
             df[col].fillna(mode_value, inplace=True)  # Fill missing values with mode
-    return df
+    return df.round(2)
 
 # Function to fill missing values with the last valid observation
 def forward_fill(df):
