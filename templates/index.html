@@ -4,143 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Imp-login</title>
-    <link rel="icon" href="/static/impai1.png" type="image/png">
-    <style>
-        body {
-            min-height: 100vh;
-            font-family: Arial, sans-serif;
-            justify-content: center;
-            align-items: center;
-            margin: 0;
-            padding: 0;
-            Background: linear-gradient(180deg, #FFFFFF 40%, #5576A8 75%, #050D83 100%);
-            color: #ffffff;
-        }
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px;
-            background:  transparent;
-            
-        }
-        .logo {
-            font-size: 24px;
-            font-weight: bold;
-            color: #007bff;
-        }
-        nav {
-            display: flex;
-            gap: 20px;
-        }
-        nav a {
-            color: #000000;
-            text-decoration: none;
-            font-weight: 500;
-        }
-        nav a:hover {
-            color: #007bff;
-        }
-        .cta-button {
-            background-color: #007bff;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-            transition: background-color 0.3s;
-        }
-        .cta-button:hover {
-            background-color: #0056b3;
-        }
-        .hero {
-            text-align: left;
-            padding: 10px 20px;
-            color: #000000;
-        }
-        .hero h1 {
-            font-size: 64px;
-            margin-bottom: 20px;
-        }
-        .hero p {
-            font-size: 18px;
-            margin-bottom: 30px;
-            max-width: 600px;
-        }
-        .highlight {
-            color: #1101a0;
-            font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
-        }
-        .secondary-highlight {
-            color: #1101a0;
-        }
-        .button-group {
-            display: flex;
-            justify-content: left;
-            align-items: left;
-            gap: 20px;
-        }
-        .secondary-button {
-            background-color: transparent;
-            color: #000000;
-            padding: 10px 20px;
-            border: 1px solid #000000;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .contact-link {
-            display: inline-block;
-            margin-top: 20px;
-            color: #007bff;
-            text-decoration: none;
-        }
-
-        /* Mobile Responsive Styling */
-        @media (max-width: 768px) {
-            
-            nav {
-                display: none; /* Hide navigation links on mobile */
-            }
-            header {
-                padding: 10px;
-            }
-            .logo {
-                font-size: 20px;
-            }
-            .hero {
-                padding: 50px 10px;
-                text-align: left;
-            }
-            .hero h1 {
-                font-size: 36px;
-            }
-            .hero p {
-                font-size: 16px;
-                margin-bottom: 20px;
-            }
-            .button-group {
-                flex-direction: row;
-                align-items: left;
-                gap: 10px;
-            }
-            .cta-button {
-                width: auto;
-                padding: 8px 16px;
-                font-size: 16px;
-                
-            }
-            /* Position logo on the left and login button on the right */
-            header {
-                justify-content: space-between;
-            }
-        }
-    </style>
+    <link rel="icon" href="/static/assets/impai1.png" type="image/png">
+    <link rel="stylesheet" href="/static/css/index.css">
+</head>
 </head>
 <body>
-    <img src="/static/impai.png" alt="Imputation AI Logo" style="height: 50px; width: 150px; margin-top: 20px;">
+    <img src="/static/assets/impai.png" alt="Imputation AI Logo" style="height: 50px; width: 150px; margin-top: 20px;">
     <header>
     </header>
     <main class="hero">
@@ -155,37 +24,6 @@
             <button class="cta-button" onclick="window.location.href='/login'">GET STARTED</button>
         </div>
     </main>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const checkAuthentication = () => {
-                const deviceToken = localStorage.getItem('deviceToken');
-                const currentTime = new Date().getTime();
-
-                if (deviceToken) {
-                    const tokenData = JSON.parse(deviceToken);
-                    if (currentTime - tokenData.timestamp < 30 * 24 * 60 * 60 * 1000) {
-                        // Redirect to home page if token is valid
-                        window.location.href = '/home';
-                        return;
-                    } else {
-                        // Token expired, remove it from local storage
-                        localStorage.removeItem('deviceToken');
-                    }
-                }
-
-                // Redirect to login page if no valid token
-                window.location.href = '/login';
-            };
-
-            document.getElementById('get-started-btn').addEventListener('click', checkAuthentication);
-        });
-
-        const setDeviceToken = () => {
-            const tokenData = {
-                timestamp: new Date().getTime()
-            };
-            localStorage.setItem('deviceToken', JSON.stringify(tokenData));
-        };
-    </script>
+    <script src="/static/js/index.js"></script>
 </body>
 </html>
