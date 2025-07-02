@@ -15,9 +15,17 @@ from sklearn.impute import IterativeImputer
 from sklearn.linear_model import BayesianRidge
 from sklearn.impute import KNNImputer
 import google.generativeai as genai
+from dotenv import load_dotenv
 
 app = Flask(__name__)
 app.secret_key = ''.join(random.choices(string.ascii_letters + string.digits, k=32))  # Secret key for sessions
+
+
+env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env")
+if os.path.exists(env_path):
+    load_dotenv(dotenv_path=env_path)
+else:
+    print(f"Warning: .env file not found at {env_path}")
 
 # Directory to save uploaded files
 UPLOAD_FOLDER = 'uploads'
@@ -26,20 +34,20 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(IMPUTED_FOLDER, exist_ok=True)
 
 # Initialize Gemini
-GOOGLE_API_KEY = "AIzaSyApppzHOtoyCJm--t3ES6fRruESfs-kH-U"  # Replace with your actual API key
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")  # Replace with your actual API key
 genai.configure(api_key=GOOGLE_API_KEY)
 model = genai.GenerativeModel('gemini-1.5-flash')
 
 # Configuration for email
-EMAIL_SERVER = "smtp.gmail.com"
+EMAIL_SERVER = os.getenv("EMAIL_SERVER")
 EMAIL_PORT = 587
-EMAIL_ADDRESS = "rwithr2004@gmail.com"  # Replace with your email
-EMAIL_PASSWORD = "slta ptzt gmyj ggmp"  # Replace with your app password
+EMAIL_ADDRESS = os.getenv("EMAIL_ADDRESS")  # Replace with your email
+EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")  # Replace with your app password
 
 # Configuration for Twilio
-TWILIO_ACCOUNT_SID = "ACbef0e7f9127fd39c1dc0894977f4e63e"  # Replace with your Twilio SID
-TWILIO_AUTH_TOKEN = "710b7c20cbd69fc9ba2620c4e37d5e1a"  # Replace with your Twilio auth token
-TWILIO_PHONE_NUMBER = "+14708237104"  # Replace with your Twilio phone number
+TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")  # Replace with your Twilio SID
+TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")  # Replace with your Twilio auth token
+TWILIO_PHONE_NUMBER = os.getenv("TWILIO_PHONE_NUMBER")  # Replace with your Twilio phone number
 
 # Store OTPs temporarily (in production, use a proper database)
 otp_store = {}
