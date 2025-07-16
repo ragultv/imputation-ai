@@ -36,7 +36,7 @@ os.makedirs(IMPUTED_FOLDER, exist_ok=True)
 # Initialize Gemini
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")  # Replace with your actual API key
 genai.configure(api_key=GOOGLE_API_KEY)
-model = genai.GenerativeModel('gemini-1.5-flash')
+model = genai.GenerativeModel('gemini-2.5-flash-lite-preview-06-17')
 
 # Configuration for email
 EMAIL_SERVER = os.getenv("EMAIL_SERVER")
